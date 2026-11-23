@@ -96,6 +96,9 @@ def yahoo_daily(symbol: str, start: str) -> pd.DataFrame:
     return df[["open", "high", "low", "close", "volume"]].dropna(subset=["close"])
 
 
+_STOOQ_DOWN = False  # nach dem ersten Fehlschlag Stooq für diesen Lauf überspringen
+
+
 def price_series(cfg: dict, meta: Meta) -> dict[str, pd.DataFrame]:
     cache = cfg["general"]["cache_dir"]
     start = cfg["general"]["history_start"]
@@ -103,11 +106,20 @@ def price_series(cfg: dict, meta: Meta) -> dict[str, pd.DataFrame]:
     for name, sym in cfg["sources"]["stooq"].items():
 
         def fetch(sym=sym):
-            try:
-                return stooq_daily(sym).loc[start:]
-            except Exception as e:  # noqa: BLE001
-                log.info("Stooq %s fehlgeschlagen (%s) – Fallback Yahoo", sym, e)
-                return yahoo_daily(sym, start)
+            global _STOOQ_DOWN
+            if not _STOOQ_DOWN:
+                try:
+                    r = requests.get("https://stooq.com/q/d/l/", params={"s": sym, "i": "d"}, headers=UA, timeout=10)
+                    r.raise_for_status()
+                    if not r.text.startswith("Date"):
+                        raise ValueError("kein CSV")
+                    df = pd.read_csv(io.StringIO(r.text), parse_dates=["Date"], index_col="Date")
+                    df.columns = [c.lower() for c in df.columns]
+                    return df.sort_index().loc[start:]
+                except Exception as e:  # noqa: BLE001
+                    _STOOQ_DOWN = True
+                    log.info("Stooq nicht erreichbar (%s) – ab jetzt nur Yahoo", e)
+            return yahoo_daily(sym, start)
 
         src = "Stooq (Fallback: Yahoo Finance)"
         if name == "gold":
