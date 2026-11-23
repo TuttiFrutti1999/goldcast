@@ -1,0 +1,9 @@
+# Manuelle Kalendereinträge (Fed- und BLS-Termine werden automatisch geladen).
+# Hier z. B. EZB-Sitzungen (ecb.europa.eu → Monetary policy meetings), PCE-Termine (bea.gov)
+# oder bekannte geopolitische Termine eintragen. Bitte nur geprüfte Termine.
+#
+# - datum: 2026-12-17
+#   ereignis: EZB-Zinsentscheid
+#   kategorie: Zentralbank
+#   quelle: ecb.europa.eu
+[]

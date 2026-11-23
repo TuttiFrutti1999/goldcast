@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoldCast – Goldpreis-Analyse & Prognose</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="dot"></span>GoldCast <small>XAU/USD</small></div>
+  <div id="stamp" class="muted">lädt …</div>
+</header>
+<nav id="tabs">
+  <button data-t="overview" class="on">Übersicht</button>
+  <button data-t="forecast">KI-Prognose</button>
+  <button data-t="sentiment">Marktstimmung</button>
+  <button data-t="technical">Technik</button>
+  <button data-t="fundamental">Fundamental</button>
+  <button data-t="calendar">Kalender</button>
+  <button data-t="history">Historie</button>
+  <button data-t="performance">Prognosegüte</button>
+  <button data-t="sources">Daten</button>
+</nav>
+<main>
+  <div id="err" class="card warn" hidden></div>
+
+  <section id="overview" class="tab on">
+    <div class="grid kpis" id="kpis"></div>
+    <div class="card"><h2>Analyse des Tages</h2><div id="analysis"></div><div id="regime" class="chips"></div></div>
+    <div class="card"><h2>Kaufumfeld <span class="badge" id="buyBadge"></span></h2><div id="buy"></div></div>
+    <div class="card"><h2>Die 8 Tagesfragen</h2><div id="qa"></div></div>
+  </section>
+
+  <section id="forecast" class="tab">
+    <div class="card"><h2>Erwartete Preisentwicklung (Median, 50 %- und 80 %-Band)</h2><div class="chartbox"><canvas id="fanChart"></canvas></div></div>
+    <div class="card"><h2>Prognosen je Horizont</h2><div class="scroll"><table id="fcTable"></table></div></div>
+    <div class="card"><h2>Detail <select id="hSel"></select></h2><div id="fcDetail"></div></div>
+  </section>
+
+  <section id="sentiment" class="tab">
+    <div class="grid kpis" id="sentKpis"></div>
+    <div class="grid two">
+      <div class="card"><h2>Positiv für Gold</h2><div id="newsPos"></div></div>
+      <div class="card"><h2>Negativ für Gold</h2><div id="newsNeg"></div></div>
+    </div>
+    <div class="card"><h2>Alle analysierten Meldungen</h2><div id="newsAll"></div></div>
+  </section>
+
+  <section id="technical" class="tab">
+    <div class="card"><h2>Kurs, SMA & Bollinger</h2><div class="chartbox"><canvas id="pxChart"></canvas></div></div>
+    <div class="grid two">
+      <div class="card"><h2>RSI (14)</h2><div class="chartbox sm"><canvas id="rsiChart"></canvas></div></div>
+      <div class="card"><h2>MACD</h2><div class="chartbox sm"><canvas id="macdChart"></canvas></div></div>
+    </div>
+    <div class="grid two">
+      <div class="card"><h2>Trend je Zeitebene</h2><div id="tfs"></div></div>
+      <div class="card"><h2>Unterstützungen & Widerstände</h2><div id="sr"></div></div>
+    </div>
+    <div class="grid two">
+      <div class="card"><h2>Indikatoren</h2><div id="ind"></div></div>
+      <div class="card"><h2>Struktur, Fibonacci, Muster</h2><div id="struct"></div></div>
+    </div>
+  </section>
+
+  <section id="fundamental" class="tab">
+    <div class="grid kpis" id="fundKpis"></div>
+    <div class="grid two">
+      <div class="card"><h2>Realrendite vs. US-Dollar</h2><div class="chartbox sm"><canvas id="rrChart"></canvas></div></div>
+      <div class="card"><h2>Inflation (ggü. Vorjahr)</h2><div class="chartbox sm"><canvas id="inflChart"></canvas></div></div>
+    </div>
+    <div class="grid two">
+      <div class="card"><h2>Positionierung & ETF</h2><div id="pos"></div></div>
+      <div class="card"><h2>Zentralbanken, Angebot & Nachfrage</h2><div id="cb"></div></div>
+    </div>
+  </section>
+
+  <section id="calendar" class="tab">
+    <div class="card"><h2>Wirtschaftskalender (60 Tage)</h2><div id="cal"></div></div>
+  </section>
+
+  <section id="history" class="tab">
+    <div class="grid kpis" id="histKpis"></div>
+    <div class="grid two">
+      <div class="card"><h2>Saisonalität (Monatsrendite Ø)</h2><div class="chartbox sm"><canvas id="seasChart"></canvas></div></div>
+      <div class="card"><h2>Korrelationen (Wochenrenditen)</h2><div id="corr"></div></div>
+    </div>
+    <div class="grid two">
+      <div class="card"><h2>Reaktion auf Krisen</h2><div class="scroll" id="crises"></div></div>
+      <div class="card"><h2>Zinszyklen & Rezession</h2><div class="scroll" id="cycles"></div></div>
+    </div>
+    <div class="card"><h2>Historische Analogien zur heutigen Lage</h2><div id="analogs"></div></div>
+  </section>
+
+  <section id="performance" class="tab">
+    <div class="card"><h2>Live-Prognosegüte (gespeicherte Prognosen)</h2><div id="live"></div></div>
+    <div class="card"><h2>Walk-Forward-Backtest (Out-of-Sample)</h2><div id="btInfo" class="muted"></div><div class="scroll" id="bt"></div></div>
+    <div class="card"><h2>Beste Modelle je Marktregime</h2><div class="scroll" id="btReg"></div></div>
+  </section>
+
+  <section id="sources" class="tab">
+    <div class="card"><h2>Datenquellen & Aktualität</h2><div class="scroll" id="src"></div></div>
+    <div class="card"><h2>Hinweise</h2><ul id="notes"></ul></div>
+  </section>
+</main>
+<footer class="muted">Keine Anlageberatung. Prognosen sind unsicher. Daten: Stooq/Yahoo, FRED, CFTC, SPDR, GDELT, RSS-Feeds.</footer>
+<script src="app.js"></script>
+</body>
+</html>

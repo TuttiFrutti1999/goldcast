@@ -1,0 +1,77 @@
+# GoldCast – zentrale Konfiguration
+# Alle Datenquellen sind kostenlos und ohne API-Key nutzbar.
+
+general:
+  history_start: "1990-01-01"      # Kurshistorie für Statistik/Saisonalität
+  model_start: "2004-01-01"        # Start der ML-Trainingsdaten (TIPS-Realzins ab 2003)
+  timezone: "Europe/Berlin"
+  output_dir: "docs/data"          # wird vom Dashboard gelesen
+  cache_dir: "data/cache"
+
+# Prognosehorizonte: Name -> Handelstage
+horizons:
+  "1d": 1
+  "7d": 5
+  "30d": 21
+  "90d": 63
+  "180d": 126
+  "365d": 252
+
+sources:
+  stooq:
+    gold: "xauusd"
+    silver: "xagusd"
+    eurusd: "eurusd"
+    spx: "^spx"
+    gld: "gld.us"          # SPDR Gold Shares (Volumen als ETF-Proxy)
+  fred:
+    # id: [Beschreibung, Frequenz, Veröffentlichungsverzug in Tagen]
+    DGS10:        ["US 10Y Rendite", "D", 1]
+    DGS2:         ["US 2Y Rendite", "D", 1]
+    DFII10:       ["US 10Y Realrendite (TIPS)", "D", 1]
+    T10YIE:       ["10Y Breakeven-Inflation", "D", 1]
+    T10Y2Y:       ["Zinskurve 10Y-2Y", "D", 1]
+    DFF:          ["Fed Funds Effective", "D", 1]
+    ECBDFR:       ["EZB Einlagensatz", "D", 1]
+    DTWEXBGS:     ["US-Dollar Broad Index", "D", 7]
+    VIXCLS:       ["VIX", "D", 1]
+    BAMLH0A0HYM2: ["US High-Yield Spread", "D", 1]
+    WALCL:        ["Fed-Bilanzsumme", "W", 2]
+    CPIAUCSL:     ["CPI", "M", 45]
+    CPILFESL:     ["Kern-CPI", "M", 45]
+    PPIACO:       ["PPI", "M", 45]
+    PCEPI:        ["PCE-Preisindex", "M", 60]
+    UNRATE:       ["Arbeitslosenquote", "M", 35]
+    PAYEMS:       ["Beschäftigte (NFP)", "M", 35]
+    SAHMREALTIME: ["Sahm-Rezessionsindikator", "M", 35]
+    GDPC1:        ["Reales BIP", "Q", 30]
+  cftc:
+    gold_code: "088691"   # COMEX Gold, Legacy Futures-Only
+  news:
+    gdelt_query: '(gold price OR "gold prices" OR bullion OR XAU)'
+    gdelt_timespan: "3d"
+    rss:
+      - ["Federal Reserve", "https://www.federalreserve.gov/feeds/press_all.xml"]
+      - ["EZB", "https://www.ecb.europa.eu/rss/press.html"]
+      - ["Kitco", "https://www.kitco.com/rss/KitcoNews.xml"]
+      - ["FXStreet Gold", "https://www.fxstreet.com/rss/news"]
+      - ["Investing.com Commodities", "https://www.investing.com/rss/news_11.rss"]
+      - ["CNBC Economy", "https://www.cnbc.com/id/20910258/device/rss/rss.html"]
+      - ["MarketWatch", "https://feeds.content.dowjones.io/public/rss/mw_topstories"]
+  calendar:
+    fed_url: "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm"
+    bls_ics: "https://www.bls.gov/schedule/news_release/bls.ics"
+
+models:
+  backtest_start: "2010-01-01"   # Beginn Out-of-Sample-Walk-Forward
+  refit_every: 63                 # Handelstage zwischen Neutrainings im Backtest (Quartal; ~10-15 Min. Laufzeit)
+  backtest_max_age_days: 7        # Backtest wöchentlich neu, sonst Cache
+  min_train: 1000                 # Mindest-Trainingslänge (Handelstage)
+  mc_paths: 5000
+  random_seed: 42
+
+decision:
+  # Kosten für die Kauf-Einschätzung (physisches Gold / ETF)
+  spread_physical_pct: 3.0       # typischer Ankauf/Verkauf-Spread Barren/Münzen
+  cost_etc_pct: 0.5              # Ordergebühr + Spread Xetra-Gold/ETC
+  min_horizon: "90d"

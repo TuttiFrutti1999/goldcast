@@ -1,0 +1,4 @@
+# Netto-Goldkäufe der Zentralbanken in Tonnen je Quartal.
+# Quelle: World Gold Council, "Gold Demand Trends" (gold.org) – kostenlos, aber nicht per API.
+# Nach jeder Quartalsveröffentlichung eine Zeile ergänzen. Leer = wird im Dashboard als "keine Daten" angezeigt.
+quartal,tonnen,quelle
