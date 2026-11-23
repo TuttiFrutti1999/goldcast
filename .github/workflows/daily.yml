@@ -1,0 +1,59 @@
+name: Tägliche Goldprognose
+
+on:
+  schedule:
+    - cron: "35 22 * * 1-5"   # Mo–Fr 22:35 UTC, nach US-Handelsschluss
+  workflow_dispatch:
+    inputs:
+      force_backtest:
+        description: "Walk-Forward-Backtest neu berechnen"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: goldcast
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install -r requirements.txt
+
+      - name: Daten-Cache wiederherstellen (inkl. Backtest)
+        uses: actions/cache@v4
+        with:
+          path: data/cache
+          key: goldcast-cache-${{ github.run_id }}
+          restore-keys: goldcast-cache-
+
+      - name: Pipeline ausführen
+        run: |
+          if [ "${{ inputs.force_backtest }}" = "true" ]; then
+            python -m goldcast.pipeline --force-backtest
+          else
+            python -m goldcast.pipeline
+          fi
+
+      - name: Look-ahead-Test
+        run: python -m pytest tests -q
+
+      - name: Ergebnisse committen
+        run: |
+          git config user.name "goldcast-bot"
+          git config user.email "goldcast-bot@users.noreply.github.com"
+          git add docs/data data/forecast_log.jsonl data/sentiment_history.csv 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "Prognose $(date -u +%Y-%m-%d)"
+          git push
